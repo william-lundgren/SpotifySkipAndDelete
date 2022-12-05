@@ -4,14 +4,13 @@ from spotipy.oauth2 import SpotifyOAuth
 
 
 class App:
-
-    def __init__(self):
+    def __init__(self, id_num, secret):
         # For getting the current playing track, removing track from playlist and skipping to next song
-        self.scope = "user-read-currently-playing,playlist-modify-private,user-modify-playback-state"
-        self.sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id="ebc656c4e7ee4e2280a2b0b0f1410d10",
-                                                       client_secret="4b5eed7800f940ed8aef228f0f43a8ea",
-                                                       redirect_uri="http://localhost",
-                                                       scope=self.scope))
+        self.scope = "playlist-modify-private,user-read-currently-playing,user-modify-playback-state"
+        self.sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=id_num,
+                                                            client_secret=secret,
+                                                            redirect_uri="http://localhost",
+                                                            scope=self.scope))
 
     def delete_skip(self):
         results = self.sp.currently_playing()
@@ -23,11 +22,15 @@ class App:
 
 
 def main():
-    app = App()
-
+    with open("client_id.txt", "r") as f:
+        id_num = f.readline()
+    with open("client_secret.txt", "r") as f:
+        secret = f.readline()
+    app = App(id_num, secret)
     pg.init()
+    print(app.sp.currently_playing())
     pg.display.set_caption("Skip and delete")
-    display = pg.display.set_mode((200,200))
+    display = pg.display.set_mode((200, 200))
     clock = pg.time.Clock()
     game_exit = False
 
@@ -38,7 +41,6 @@ def main():
                 quit()
 
             if event.type == pg.MOUSEBUTTONDOWN:
-                print("TRUE")
                 app.delete_skip()
 
         pg.display.update()
