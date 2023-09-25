@@ -7,6 +7,7 @@ class App(tk.Frame):
     def __init__(self, id_num, secret):
         self.root = tk.Tk()
         self.root.geometry("200x200")
+        self.root.title("SkipAndDelete")
         tk.Frame.__init__(self, self.root)
 
         # For getting the current playing track, removing track from playlist and skipping to next song
@@ -16,6 +17,8 @@ class App(tk.Frame):
                                                             redirect_uri="http://localhost",
                                                             scope=self.scope))
         self.root.bind("<Return>", self.delete_skip)
+        self.root.bind("<Tab>", self.add)
+
         self.root.overrideredirect(True)
         self.root.overrideredirect(False)
         self.root.wm_attributes("-topmost", "true")
@@ -28,8 +31,13 @@ class App(tk.Frame):
         self.sp.next_track()
         with open("skipped.txt", "a") as file:
             file.write(f'{results["item"]["name"]}, {results["item"]["artists"][0]["name"]}\n')
-        # print("SKIPPED AND DELETED")
+        print("SKIPPED AND DELETED")
 
+    def add(self, event):
+        songs = [self.sp.currently_playing()["item"]["uri"]]
+        playlist_uri = "spotify:playlist:6qB1pu6sxb1tB3eyJG4b6Q"
+        self.sp.playlist_add_items(playlist_id=playlist_uri, items=songs, position=None)
+        print("Added to list!")
 
 def main():
     with open("client_id.txt", "r") as f:
@@ -37,6 +45,7 @@ def main():
     with open("client_secret.txt", "r") as f:
         secret = f.readline()
     app = App(id_num, secret)
+    print(app.sp.currently_playing())
     app.root.mainloop()
 
 
